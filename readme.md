@@ -1,89 +1,106 @@
-# Git Flow
+# Arquitectura de Frontend con Vue
 
-Este proyecto sigue un flujo de trabajo basado en ramas que organiza y separa el desarrollo del frontend, backend y las pruebas. A continuación se describe el flujo de trabajo y las ramas involucradas.
+Este proyecto sigue una arquitectura hexagonal (puertos y adaptadores) aplicada en un frontend desarrollado con Vue.js, implementando principios **SOLID** y patrones de diseño. La estructura modular asegura que el código sea altamente mantenible, escalable y desacoplado.
 
-## Estructura de Ramas
+## Estructura de Carpetas
 
-### 1. **`main`**
-- **Propósito**: La rama `main` es la rama de producción principal. Solo se utiliza para documentación.
-- **Regla**: Solo se pueden agregar o actualizar archivos de documentación en esta rama. No se aceptan cambios de código aquí.
-
-### 2. **`frontend`**
-- **Propósito**: Rama principal para el desarrollo del frontend.
-- **Regla**: Todo el desarrollo de frontend parte de esta rama. Las ramas de características (features) específicas deben derivar de aquí.
-
-### 3. **`backend`**
-- **Propósito**: Rama principal para el desarrollo del backend.
-- **Regla**: Todo el desarrollo de backend parte de esta rama. Las ramas de características (features) específicas deben derivar de aquí.
-
-### 4. **`developFront`**
-- **Propósito**: Rama de integración para el frontend.
-- **Regla**: Las ramas de características del frontend se integran aquí mediante Pull Requests.
-
-### 5. **`developBack`**
-- **Propósito**: Rama de integración para el backend.
-- **Regla**: Las ramas de características del backend se integran aquí mediante Pull Requests.
-
-### 6. **`QA`**
-- **Propósito**: Rama principal para las pruebas de QA.
-- **Regla**: Las ramas de pruebas (test) derivan de esta rama y contienen las pruebas correspondientes a las características del frontend o backend.
-
-## Flujo de Trabajo
-
-### 1. **Creación de Ramas de Características (Feature Branches)**
-
-Cuando se va a trabajar en una nueva característica o tarea, se crea una nueva rama desde `frontend` o `backend`, dependiendo de si la tarea es de frontend o backend.
-
-- **Frontend**: La rama se crea desde `frontend` con el siguiente formato:
-feature/front/TICKET-nombreRama
-
-
-- **Backend**: La rama se crea desde `backend` con el siguiente formato:
-feature/back/TICKET-nombreRama
-
-
-### 2. **Desarrollo de la Característica**
-
-El trabajo de desarrollo se realiza en la rama `feature/front/TICKET-nombreRama` o `feature/back/TICKET-nombreRama`, dependiendo de la naturaleza del ticket.
-
-### 3. **Pull Request (PR) a Ramas de Desarrollo**
-
-Una vez que el desarrollo de la característica está completo, se realiza un Pull Request (PR) hacia la rama de desarrollo correspondiente:
-
-- **Frontend**: Se realiza un PR hacia la rama `developFront`.
-- **Backend**: Se realiza un PR hacia la rama `developBack`.
-
-El equipo revisará el PR, y una vez aprobado, se realiza el merge de la característica a `developFront` o `developBack`.
-
-### 4. **Pruebas (QA)**
-
-Cuando una característica está lista para ser probada, se crea una nueva rama de pruebas desde `QA`:
-
-- **Formato de rama de pruebas**:
-test/TICKET-nombreRama
-
-
-Las pruebas se realizan en esta rama, y cualquier problema identificado puede solucionarse dentro de la rama de pruebas o en la rama de características correspondiente.
-
-### 5. **Documentación en `main`**
-
-Cualquier actualización o adición de documentación se realiza directamente en la rama `main`. No se permite código en esta rama, solo documentación.
-
-## Resumen de Comandos
-
-1. **Crear una rama de características** (Frontend o Backend):
- ```bash
- git checkout -b feature/front/TICKET-nombreRama frontend
- # o
- git checkout -b feature/back/TICKET-nombreRama backend
+```bash
+src/
+├── adapters/
+│   ├── api/
+│   │   ├── axios-instance.js
+│   │   ├── userApiAdapter.js
+│   │   └── productApiAdapter.js
+│   ├── storage/
+│   │   ├── localStorageAdapter.js
+│   │   └── sessionStorageAdapter.js
+│   └── ui/
+│       ├── Button.vue
+│       ├── Modal.vue
+│       └── Input.vue
+├── application/
+│   ├── use-cases/
+│   │   ├── user/
+│   │   │   ├── CreateUserUseCase.js
+│   │   │   ├── GetUserUseCase.js
+│   │   │   └── UpdateUserUseCase.js
+│   │   └── product/
+│   │       ├── GetProductUseCase.js
+│   │       └── DeleteProductUseCase.js
+│   └── ports/
+│       ├── UserRepositoryPort.js
+│       └── ProductRepositoryPort.js
+├── domain/
+│   ├── models/
+│   │   ├── User.js
+│   │   └── Product.js
+│   ├── services/
+│   │   ├── UserService.js
+│   │   └── ProductService.js
+│   └── value-objects/
+│       ├── Email.js
+│       └── ProductPrice.js
+├── infrastructure/
+│   ├── repositories/
+│   │   ├── user/
+│   │   │   ├── InMemoryUserRepository.js
+│   │   │   └── RestUserRepository.js
+│   │   └── product/
+│   │       ├── InMemoryProductRepository.js
+│   │       └── RestProductRepository.js
+│   └── logging/
+│       ├── ConsoleLogger.js
+│       └── RemoteLogger.js
+├── presentation/
+│   ├── components/
+│   │   ├── UserList.vue
+│   │   ├── UserForm.vue
+│   │   └── ProductList.vue
+│   ├── views/
+│   │   ├── Home.vue
+│   │   ├── UserPage.vue
+│   │   └── ProductPage.vue
+│   └── router/
+│       └── index.js
+├── App.vue
+└── main.js
 ```
-2. **Crear una rama de pruebas**:
-git checkout -b test/TICKET-nombreRama QA
-3. **Hacer un Pull Request (PR)**:
+## Descripción de Carpetas
 
-Dirigido a developFront si es una característica de frontend.
-Dirigido a developBack si es una característica de backend.
-Notas
-Las ramas frontend y backend no deben ser directamente modificadas. Todo el desarrollo debe pasar por las ramas feature.
-Las ramas QA solo deben contener código de prueba, y las subramas de prueba deben crearse para cada ticket.
-Este flujo asegura una separación clara entre las etapas de desarrollo, pruebas y documentación, permitiendo una integración organizada y un seguimiento eficiente de los cambios.
+- **`adapters/`**: Contiene los adaptadores que transforman las peticiones de datos entre el mundo externo (APIs, almacenamiento, UI) y la aplicación. Esto permite que la lógica del negocio sea independiente de detalles externos.
+  - **`api/`**: Adaptadores que interactúan con APIs externas.
+  - **`storage/`**: Adaptadores para almacenamiento en `localStorage` y `sessionStorage`.
+  - **`ui/`**: Componentes UI que actúan como adaptadores entre la presentación y la lógica de la aplicación.
+
+- **`application/`**: Contiene la lógica de negocio en forma de casos de uso y define los puertos que actúan como contratos que los adaptadores deben implementar.
+  - **`use-cases/`**: Implementaciones de los casos de uso.
+  - **`ports/`**: Interfaces que los adaptadores deben cumplir para comunicar la lógica de negocio con el mundo externo.
+
+- **`domain/`**: Contiene la lógica de negocio central, incluyendo modelos de dominio, servicios y objetos de valor.
+  - **`models/`**: Entidades de dominio.
+  - **`services/`**: Lógica del negocio que no depende de un caso de uso específico.
+  - **`value-objects/`**: Modelos de datos inmutables.
+
+- **`infrastructure/`**: Implementaciones concretas de los puertos definidos en la capa de aplicación.
+  - **`repositories/`**: Implementaciones de los repositorios que interactúan con APIs, bases de datos, etc.
+  - **`logging/`**: Implementaciones de loggers.
+
+- **`presentation/`**: Todo lo relacionado con la presentación de la aplicación.
+  - **`components/`**: Componentes reutilizables de Vue.
+  - **`views/`**: Vistas que representan páginas completas.
+  - **`router/`**: Configuración del enrutamiento de Vue Router.
+
+- **Raíz (`App.vue`, `main.js`)**: Archivos de configuración principal de la aplicación Vue.
+
+## Principios SOLID Aplicados
+
+- **S**: Cada clase tiene una única responsabilidad.
+- **O**: Las interfaces (`ports/`) permiten que la arquitectura sea abierta para extensión pero cerrada para modificación.
+- **L, I**: Las clases implementan interfaces bien definidas, asegurando que las dependencias puedan ser sustituidas sin romper la funcionalidad.
+- **D**: Las dependencias se inyectan a través de adaptadores y puertos, permitiendo que la lógica del negocio no dependa de implementaciones concretas.
+
+## Patrones de Diseño Utilizados
+
+- **Adaptador**: Las implementaciones de las interfaces conectan la lógica interna con el mundo externo.
+- **Factory**: Puede usarse para crear instancias de servicios o repositorios.
+- **Inversión de Dependencias**: La lógica del negocio depende de abstracciones, no de detalles concretos.
