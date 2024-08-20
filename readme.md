@@ -1,89 +1,131 @@
-# Git Flow
+# Arquitectura de Microservicios con Puertos y Adaptadores
 
-Este proyecto sigue un flujo de trabajo basado en ramas que organiza y separa el desarrollo del frontend, backend y las pruebas. A continuación se describe el flujo de trabajo y las ramas involucradas.
+Este documento describe la arquitectura de microservicios basada en **Django Rest Framework (DRF)** y **FastAPI**, utilizando principios SOLID y patrones de diseño con la arquitectura de puertos y adaptadores. Cada microservicio es independiente, desplegable por separado, y puede interactuar con otros microservicios mediante APIs o colas de mensajes.
 
-## Estructura de Ramas
+## Estructura General para Microservicios
 
-### 1. **`main`**
-- **Propósito**: La rama `main` es la rama de producción principal. Solo se utiliza para documentación.
-- **Regla**: Solo se pueden agregar o actualizar archivos de documentación en esta rama. No se aceptan cambios de código aquí.
+Cada microservicio tendrá su propio repositorio o directorio. Dentro de cada microservicio, seguiremos la estructura de puertos y adaptadores, con capas bien definidas para asegurar la modularidad y el desacoplamiento.
 
-### 2. **`frontend`**
-- **Propósito**: Rama principal para el desarrollo del frontend.
-- **Regla**: Todo el desarrollo de frontend parte de esta rama. Las ramas de características (features) específicas deben derivar de aquí.
+### Ejemplo de Estructura para un Microservicio
 
-### 3. **`backend`**
-- **Propósito**: Rama principal para el desarrollo del backend.
-- **Regla**: Todo el desarrollo de backend parte de esta rama. Las ramas de características (features) específicas deben derivar de aquí.
-
-### 4. **`developFront`**
-- **Propósito**: Rama de integración para el frontend.
-- **Regla**: Las ramas de características del frontend se integran aquí mediante Pull Requests.
-
-### 5. **`developBack`**
-- **Propósito**: Rama de integración para el backend.
-- **Regla**: Las ramas de características del backend se integran aquí mediante Pull Requests.
-
-### 6. **`QA`**
-- **Propósito**: Rama principal para las pruebas de QA.
-- **Regla**: Las ramas de pruebas (test) derivan de esta rama y contienen las pruebas correspondientes a las características del frontend o backend.
-
-## Flujo de Trabajo
-
-### 1. **Creación de Ramas de Características (Feature Branches)**
-
-Cuando se va a trabajar en una nueva característica o tarea, se crea una nueva rama desde `frontend` o `backend`, dependiendo de si la tarea es de frontend o backend.
-
-- **Frontend**: La rama se crea desde `frontend` con el siguiente formato:
-feature/front/TICKET-nombreRama
-
-
-- **Backend**: La rama se crea desde `backend` con el siguiente formato:
-feature/back/TICKET-nombreRama
-
-
-### 2. **Desarrollo de la Característica**
-
-El trabajo de desarrollo se realiza en la rama `feature/front/TICKET-nombreRama` o `feature/back/TICKET-nombreRama`, dependiendo de la naturaleza del ticket.
-
-### 3. **Pull Request (PR) a Ramas de Desarrollo**
-
-Una vez que el desarrollo de la característica está completo, se realiza un Pull Request (PR) hacia la rama de desarrollo correspondiente:
-
-- **Frontend**: Se realiza un PR hacia la rama `developFront`.
-- **Backend**: Se realiza un PR hacia la rama `developBack`.
-
-El equipo revisará el PR, y una vez aprobado, se realiza el merge de la característica a `developFront` o `developBack`.
-
-### 4. **Pruebas (QA)**
-
-Cuando una característica está lista para ser probada, se crea una nueva rama de pruebas desde `QA`:
-
-- **Formato de rama de pruebas**:
-test/TICKET-nombreRama
-
-
-Las pruebas se realizan en esta rama, y cualquier problema identificado puede solucionarse dentro de la rama de pruebas o en la rama de características correspondiente.
-
-### 5. **Documentación en `main`**
-
-Cualquier actualización o adición de documentación se realiza directamente en la rama `main`. No se permite código en esta rama, solo documentación.
-
-## Resumen de Comandos
-
-1. **Crear una rama de características** (Frontend o Backend):
- ```bash
- git checkout -b feature/front/TICKET-nombreRama frontend
- # o
- git checkout -b feature/back/TICKET-nombreRama backend
+```bash
+service-name/
+├── src/
+│   ├── adapters/
+│   │   ├── http/
+│   │   │   ├── drf/
+│   │   │   │   ├── views.py
+│   │   │   │   ├── serializers.py
+│   │   │   │   └── urls.py
+│   │   │   ├── fastapi/
+│   │   │   │   ├── views.py
+│   │   │   │   └── urls.py
+│   │   ├── repositories/
+│   │   │   ├── django_repository.py
+│   │   │   └── async_repository.py
+│   ├── application/
+│   │   ├── use-cases/
+│   │   │   ├── CreateUserUseCase.py
+│   │   │   └── UpdateUserUseCase.py
+│   │   ├── ports/
+│   │       ├── user_repository_port.py
+│   │       └── async_service_port.py
+│   ├── domain/
+│   │   ├── models/
+│   │   │   ├── user.py
+│   │   │   └── product.py
+│   │   ├── services/
+│   │   │   ├── user_service.py
+│   │   │   └── product_service.py
+│   ├── infrastructure/
+│   │   ├── database/
+│   │   │   ├── migrations/
+│   │   │   └── db_handler.py
+│   │   ├── logging/
+│   │   ├── cache/
+│   │   │   ├── redis_cache.py
+│   │   │   └── memcached_cache.py
+│   │   └── message_brokers/
+│   │       ├── kafka_broker.py
+│   │       └── rabbitmq_broker.py
+├── tests/
+│   ├── unit/
+│   └── integration/
+├── Dockerfile
+├── docker-compose.yml
+└── manage.py / app.py
 ```
-2. **Crear una rama de pruebas**:
-git checkout -b test/TICKET-nombreRama QA
-3. **Hacer un Pull Request (PR)**:
+## Descripción de Carpetas y Archivos
 
-Dirigido a developFront si es una característica de frontend.
-Dirigido a developBack si es una característica de backend.
-Notas
-Las ramas frontend y backend no deben ser directamente modificadas. Todo el desarrollo debe pasar por las ramas feature.
-Las ramas QA solo deben contener código de prueba, y las subramas de prueba deben crearse para cada ticket.
-Este flujo asegura una separación clara entre las etapas de desarrollo, pruebas y documentación, permitiendo una integración organizada y un seguimiento eficiente de los cambios.
+- **`src/`**: Contiene el código fuente del microservicio.
+
+  - **`adapters/`**: Contiene las implementaciones que permiten a la lógica de negocio interactuar con el mundo externo.
+
+    - **`http/`**: Adaptadores que manejan la comunicación HTTP. Puedes tener subcarpetas separadas para **DRF** y **FastAPI**, dependiendo de cuál maneje las diferentes rutas y controladores.
+    
+    - **`repositories/`**: Adaptadores que implementan los puertos de repositorio para interactuar con la base de datos de manera síncrona (usando **DRF**) o asíncrona (usando **FastAPI**).
+
+  - **`application/`**: Contiene la lógica de negocio en forma de casos de uso y define los **puertos** que actúan como contratos que los adaptadores deben implementar.
+    
+    - **`use-cases/`**: Implementaciones de casos de uso específicos, como la creación de usuarios, productos, etc.
+    
+    - **`ports/`**: Interfaces que definen los métodos que los adaptadores deben implementar, como `user_repository_port.py` o `async_service_port.py`.
+
+  - **`domain/`**: Define los modelos, servicios y objetos de valor fundamentales para la lógica de negocio.
+    
+    - **`models/`**: Entidades de dominio como `User` y `Product`.
+    
+    - **`services/`**: Contiene la lógica central de negocio relacionada con cada modelo, como `user_service.py` y `product_service.py`.
+
+  - **`infrastructure/`**: Implementaciones técnicas que interactúan con servicios externos como bases de datos, cachés y brokers de mensajes.
+    
+    - **`database/`**: Manejo de bases de datos y migraciones.
+    
+    - **`logging/`**: Implementaciones para la gestión de logs.
+    
+    - **`cache/`**: Implementaciones de caché, como `redis_cache.py`.
+    
+    - **`message_brokers/`**: Manejo de colas de mensajes, como Kafka o RabbitMQ, para la comunicación entre microservicios.
+
+- **`tests/`**: Carpeta para pruebas unitarias e integrales.
+  
+  - **`unit/`**: Pruebas de componentes individuales.
+  
+  - **`integration/`**: Pruebas que verifican la integración entre diferentes componentes y servicios externos.
+
+- **`Dockerfile`**: Archivo de configuración para construir la imagen Docker del microservicio.
+
+- **`docker-compose.yml`**: Archivo de configuración para levantar el servicio y sus dependencias (bases de datos, caché, etc.) en contenedores Docker.
+
+## Características Clave de Microservicios
+
+1. **Independencia**  
+   Cada microservicio es completamente autónomo. Cada servicio tiene su propio código, `Dockerfile`, y puede ser desplegado, actualizado y escalado de manera independiente de los otros.
+
+2. **Comunicación entre Microservicios**  
+   Los microservicios pueden comunicarse entre sí utilizando **APIs REST** (sincrónicamente) o a través de **colas de mensajes** (asíncronamente). Esto permite una arquitectura flexible y desacoplada.
+
+   - **APIs REST**: Los microservicios pueden exponerse mediante APIs utilizando **DRF** o **FastAPI**.
+   - **Colas de Mensajes**: Para operaciones asíncronas o eventos, los microservicios pueden interactuar a través de sistemas de mensajería como Kafka o RabbitMQ.
+
+3. **Despliegue Independiente**  
+   Cada microservicio tiene su propio `Dockerfile` y pipeline de CI/CD, lo que permite que cada servicio sea desplegado sin afectar a otros. Esto asegura que las actualizaciones sean más rápidas y específicas.
+
+4. **Separación de Preocupaciones**
+   - **Adaptadores**: Conectan la lógica de negocio con el mundo externo (HTTP, bases de datos, APIs).
+   - **Puertos**: Definen contratos para la lógica de negocio que los adaptadores deben cumplir, garantizando que los microservicios sean extensibles y fácilmente modificables.
+   - **Dominio**: Contiene las reglas de negocio puras, independientes de los detalles técnicos.
+
+## Principios SOLID Aplicados
+
+- **S**: Cada clase y módulo tiene una única responsabilidad, facilitando su mantenimiento y evolución.
+- **O**: El sistema es abierto a la extensión mediante la creación de nuevos adaptadores o servicios, pero cerrado a la modificación del código existente.
+- **L**: Las implementaciones de los puertos pueden ser reemplazadas sin afectar el comportamiento del sistema.
+- **I**: Las interfaces están diseñadas para ser específicas y evitar que las clases dependan de métodos innecesarios.
+- **D**: El código de negocio depende de abstracciones (puertos) y no de implementaciones concretas (adaptadores).
+
+## Patrones de Diseño Utilizados
+
+- **Adaptador**: Conecta la lógica de negocio con sistemas externos.
+- **Factory**: Utilizado para crear instancias de clases o servicios en función de la configuración.
+- **Inversión de Dependencias**: La lógica de negocio depende de interfaces y no de implementaciones concretas.
